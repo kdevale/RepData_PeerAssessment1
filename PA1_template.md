@@ -8,7 +8,8 @@ output:
 This analysis of Activity Monitoring Data makes heavy use of **R's dplyr**.  For information on the data files and fields please see the Readme or the doc/instructions.  Remember to set your current working directory to the location of this file.
 
 ## Loading and preprocessing the data
-```{r }
+
+```r
 library(dplyr)
 library(datasets)
 library(ggplot2)
@@ -26,7 +27,8 @@ removed for our initial analysis.
 
 
 ## What is mean total number of steps taken per day?
-```{r}
+
+```r
 no_na_date <- group_by(data_no_na_tbl, date)        #group by date
 steps_per_day <- summarize(no_na_date, sum(steps))  #calc sum
 colnames(steps_per_day) <- c("date","total")
@@ -36,18 +38,21 @@ colnames(steps_per_day) <- c("date","total")
 hist(steps_per_day$total, xlab = "total number of steps per day", 
      labels = TRUE, ylim = c(0,40), main = "Number of Daily Steps",
      col = "BLUE")
+```
 
+![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-2-1.png) 
 
+```r
 #mean/median total number of steps taken per day.
 results <- summarize(steps_per_day, mean = mean(total), median = median(total))
-
 ```
-The mean total number of steps per day is `r results$mean`.
-The median total number of steps per day is `r results$median`.
+The mean total number of steps per day is 1.0766189 &times; 10<sup>4</sup>.
+The median total number of steps per day is 10765.
 
 
 ## What is the average daily activity pattern?
-```{r}
+
+```r
 #average daily activity pattern
 no_na_interval <- group_by(data_no_na_tbl, interval)
 avg_steps_per_interval <- summarize(no_na_interval, mean = mean(steps))
@@ -56,17 +61,22 @@ qplot(interval,mean,data = avg_steps_per_interval,geom = "line",
       main = "Average Daily Activity Pattern", 
       ylab = "Mean number of Steps", 
       xlab = "Interval" )
+```
 
+![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3-1.png) 
+
+```r
 #interval with max avg steps
 max_index <- which.max(avg_steps_per_interval$mean)         
 max_interval <- avg_steps_per_interval[max_index,]
 ```
-The average daily activity pattern shows that interval `r max_interval$interval` has the maximum average steps with the value `r max_interval$mean` .
+The average daily activity pattern shows that interval 835 has the maximum average steps with the value 206.1698113 .
 
 This value corresponds with the graph were we can see a morning spike.  
 
 ## Imputing missing values
-```{r}
+
+```r
 ##################################################################
 # Missing Values - lots of NA in steps column could skew data
 ##################################################################
@@ -80,14 +90,15 @@ missing_rows<- which(is.na(calc_data$steps))
 num_na_rows <- length(missing_rows)
 ```
 
-**There are `r num_na_rows` rows that did not record a value for steps.**  By omitting those rows there is a chance our findings are skewed.  
+**There are 2304 rows that did not record a value for steps.**  By omitting those rows there is a chance our findings are skewed.  
   
 To correct against that likelihood we replaced missing data.  
 
 1.  The first replacement attempted is the average of the interval corresponding to the missing data point.  *(for example if there is a missing data for interval 1000 on October 2, 2012 then the average for interval 1000 is used.)*
 2.  Otherwise, if there is no average available for an interval (all the values were missing) then the overall average was used.  *(for this particular data set this step was not used but kept for error handling completeness)*
 
-```{r}
+
+```r
 #calculate the overall average number of steps per interval
 total_avg <- summarize(avg_steps_per_interval, avg = mean(mean))
 
@@ -133,17 +144,18 @@ hist(steps_per_day$total,
      ylim = c(0,40), 
      main = "Number of Daily Steps (missing values estimated)",
      col = "green")
-
 ```
+
+![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5-1.png) 
    
    
 You will note that this histogram differs from our prior results.  The middle 
 bar for the interval 10000 to 15000 increased significantly from 28 to 36.
 
-**The mean total number of steps per day is `r results_calc$mean` versus 
-`r results$mean`.
-The median total number of steps per day is `r results_calc$median` versus 
-`r results$median`. **
+**The mean total number of steps per day is 1.0765639 &times; 10<sup>4</sup> versus 
+1.0766189 &times; 10<sup>4</sup>.
+The median total number of steps per day is 1.0762 &times; 10<sup>4</sup> versus 
+10765. **
 
 Replacing the missing or "NA" values with reasonable estimates 
 changes our understanding of the number of daily steps.
@@ -154,7 +166,8 @@ changes our understanding of the number of daily steps.
 One thing to consider is whether there is a difference between weekdays and 
 weekends activity levels and timing.  
 
-```{r}
+
+```r
 ##########################################################################
 # Weekday vs Weekend
 ##########################################################################
@@ -173,8 +186,9 @@ qplot(interval, mean, data = avg_steps, geom = "line",
       ylab = "Number of Steps", xlab = "Interval", 
       main = "Average Number of Steps on the Weekend and Weekdays",
       facets = day_type ~.)
-
 ```
+
+![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6-1.png) 
    
    
    
